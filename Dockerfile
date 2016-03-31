@@ -1,11 +1,15 @@
-FROM debian:sid
+FROM debian:jessie-backports
 
-RUN DEBIAN_FRONTEND=noninteractive apt-get -qq update
-RUN DEBIAN_FRONTEND=noninteractive apt-get -qq -y install zlib1g-dev gcc make git autoconf autogen automake pkg-config  
+RUN apt-get update \
+	&& apt-get -y install zlib1g-dev gcc make git autoconf autogen automake pkg-config \
+	&& rm -rf /var/lib/apt/lists/*
 
-RUN git clone https://github.com/firehol/netdata.git netdata.git --depth=1 && \
-   cd netdata.git && \
-   ./netdata-installer.sh
+RUN git clone https://github.com/firehol/netdata.git netdata.git --depth=1 \
+	&& cd netdata.git && ./netdata-installer.sh && rm -rf /netdata.git
+
+RUN ln -sf /dev/stdout /var/log/netdata/access.log \
+	&& ln -sf /dev/stdout /var/log/netdata/debug.log \
+	&& ln -sf /dev/stderr /var/log/netdata/error.log 
 
 EXPOSE 19999
 
